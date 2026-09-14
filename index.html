@@ -1,1 +1,971 @@
-<!doctype html><html lang="gl"><head><meta charset="utf-8"><title>ESMAS-ES+ · Viaxe en tren</title></head><body><h1>ESMAS-ES+ · Viaxe en tren</h1><p>APP 1 en preparación.</p></body></html>
+<!DOCTYPE html>
+<html lang="gl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>ESMAS-ES+ · Viaxe en tren · APP 1</title>
+<style>
+:root{
+  --bg:#f5f6f7; --paper:#fff; --ink:#1c232b; --muted:#68727d; --line:#dfe3e6;
+  --accent:#2459d3; --accent2:#123b96; --soft:#eef3ff; --ok:#167a47; --warn:#a96300;
+  --danger:#a12c2c; --focus:#ffcb45; --radius:18px; --shadow:0 8px 28px rgba(23,35,49,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+button,input,select{font:inherit}
+button{touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1480px;margin:auto;padding:10px 18px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{width:38px;height:38px;border-radius:11px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800}
+.brand h1{font-size:1rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{display:block;color:var(--muted);font-weight:500}
+.statusline{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pill{padding:6px 10px;border-radius:999px;background:#f0f2f4;border:1px solid var(--line);font-size:.82rem;color:#3f4852}
+.pill strong{color:var(--ink)}
+.wrap{max-width:1480px;margin:0 auto;padding:20px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.start{max-width:900px;margin:3vh auto;padding:28px}
+.start h2{font-size:clamp(1.6rem,4vw,2.4rem);margin:.1em 0 .3em}
+.start p.lead{font-size:1.05rem;color:var(--muted);margin-top:0}
+.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+.modebtn{padding:16px;border-radius:14px;border:1px solid var(--line);background:#fff;text-align:left;cursor:pointer}
+.modebtn.active{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.panel{padding:18px;border:1px solid var(--line);border-radius:14px;background:#fbfcfd}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field label{display:block;font-weight:700;font-size:.9rem;margin-bottom:5px}
+.field small{display:block;color:var(--muted);margin-top:5px}
+.field input,.field select{width:100%;padding:12px 13px;border:1px solid #cbd2d8;border-radius:10px;background:white;min-height:46px}
+.codebox{display:flex;gap:10px;align-items:flex-end}
+.codeout{flex:1;padding:11px 13px;border-radius:10px;background:#111a23;color:#fff;font-weight:800;letter-spacing:.06em;min-height:46px;display:flex;align-items:center}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:750;cursor:pointer;min-height:44px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:#eef0f2;color:#202832;border:1px solid #d8dde1}
+.btn-danger{background:#fff1f1;color:var(--danger);border:1px solid #efc8c8}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.notice{padding:12px 14px;border-radius:11px;margin:12px 0;border:1px solid}
+.notice-info{background:#f2f6ff;border-color:#ccd9ff}
+.notice-warn{background:#fff7e7;border-color:#f1d39c;color:#674210}
+.notice-ok{background:#edf8f2;border-color:#b9dfca;color:#125f38}
+.notice-danger{background:#fff0f0;border-color:#ebc0c0;color:#7d2020}
+.app{display:none}
+.guidebar{
+  position:sticky;top:67px;z-index:35;
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;
+  margin:0 0 14px;padding:13px 15px;
+  background:#fffbe8;border:2px solid #e4c54f;border-radius:15px;
+  box-shadow:0 8px 24px rgba(72,58,8,.12)
+}
+.guideicon{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#1f2933;color:#fff;font-weight:900;font-size:1.1rem}
+.guidetitle{font-weight:900;font-size:.88rem;text-transform:uppercase;letter-spacing:.055em;color:#665009}
+.guidetext{font-size:1rem;font-weight:700;margin-top:2px;color:#26220f}
+.guideaction{white-space:nowrap}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,470px);gap:18px;align-items:start}
+.textcard,.treecard{min-width:0}
+.textcard{padding:20px}
+.treecard{position:sticky;top:80px;max-height:calc(100vh - 100px);overflow:auto;padding:18px}
+.sectionhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}
+.sectionhead h2,.sectionhead h3{margin:0}
+.sectionhead p{margin:4px 0 0;color:var(--muted);font-size:.92rem}
+.progress{min-width:96px;text-align:right;font-weight:800}
+.progressbar{height:8px;background:#e9edf1;border-radius:99px;overflow:hidden;margin-top:5px}
+.progressbar span{display:block;height:100%;background:var(--accent);width:0%}
+.story{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.12rem,2vw,1.32rem);line-height:1.95;padding:4px 2px 12px}
+.target{display:inline;border:0;background:#fff2a8;border-bottom:2px solid #d1a800;border-radius:5px;padding:1px 3px;margin:0 1px;cursor:pointer;color:inherit;font:inherit;line-height:inherit}
+.target:hover{background:#ffe67a}
+.target.done{background:#dff3e7;border-bottom-color:#3a9a65}
+.target.active{background:#dce7ff;border-bottom-color:var(--accent);box-shadow:0 0 0 2px rgba(36,89,211,.16)}
+.target.mismatch{background:#ffe3dc;border-bottom-color:#b54a33}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.83rem;margin:8px 0 16px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.targetlist{display:flex;gap:7px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.targetchip{border:1px solid #d9dee3;background:#fff;border-radius:999px;padding:6px 9px;cursor:pointer;font-size:.84rem}
+.targetchip.done{background:#edf8f2;border-color:#b9dfca}
+.targetchip.active{background:var(--soft);border-color:#99b4ff}
+.targetchip.mismatch{border-color:#e1a998;background:#fff1ec}
+.phasebox{margin-bottom:14px}
+.phasebox .title{font-weight:850;font-size:1.02rem}
+.phasebox .desc{font-size:.9rem;color:var(--muted);margin-top:3px}
+.metaedit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.metaedit .field input{padding:9px 10px;min-height:40px}
+.activeword{padding:12px;border-radius:12px;background:#f6f7f9;border:1px solid var(--line);margin-bottom:14px}
+.activeword .lemma{font-size:1.25rem;font-weight:850}
+.activeword .context{color:var(--muted);font-size:.9rem}
+.history{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.hist{padding:4px 7px;border-radius:7px;background:#fff;border:1px solid var(--line);font-size:.77rem}
+.tree-empty{color:var(--muted);padding:24px 6px;text-align:center}
+.level-title{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800;margin:14px 0 8px}
+.option-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.level2head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.backlevel{border:1px solid var(--line);background:#fff;color:var(--accent2);border-radius:999px;padding:7px 10px;font-size:.82rem;font-weight:800;cursor:pointer;text-transform:none;letter-spacing:0}
+.backlevel:hover{background:var(--soft);border-color:#9fb5e8}
+.option{width:100%;text-align:left;padding:11px;border-radius:11px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.option:hover{border-color:#9fb5e8;background:#fbfdff}
+.option.selected{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.option .olabel{font-weight:800}
+.option .ogloss{font-size:.86rem;color:var(--muted);margin-top:2px}
+.examples{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.ex{font-size:.77rem;background:#f0f2f4;border-radius:999px;padding:3px 7px;color:#4b5661}
+.routebox{margin-top:14px;padding:12px;border-radius:11px;background:#111a23;color:#fff}
+.routebox small{color:#b9c2cc}
+.route{font-weight:850;margin-top:4px}
+.savebar{position:sticky;bottom:0;z-index:30;margin-top:18px;padding:13px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:15px;box-shadow:0 -4px 20px rgba(20,30,40,.08);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.savebar .left{font-size:.9rem;color:var(--muted)}
+.savebar .right{display:flex;gap:8px;flex-wrap:wrap}
+.freeze{position:fixed;inset:0;background:rgba(20,28,36,.38);z-index:60;display:none;place-items:center;padding:20px}
+.freeze .modal{max-width:600px;width:100%;padding:24px;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+.freeze .modal h3{margin-top:0}
+.mobile-tree-link{display:none}
+.sources{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin-top:18px}
+.hidden{display:none!important}
+@media (max-width:980px){
+  .workspace{grid-template-columns:1fr}
+  .treecard{position:relative;top:auto;max-height:none}
+  .mobile-tree-link{display:inline-flex}
+}
+@media (max-width:700px){
+  .wrap{padding:10px}
+  .guidebar{top:66px;grid-template-columns:auto 1fr;padding:11px 12px;border-radius:12px}
+  .guideaction{grid-column:1/-1;width:100%}
+  .guideicon{width:30px;height:30px}
+  .topbar-inner{padding:9px 10px;align-items:flex-start}
+  .brand small{display:none}
+  .statusline{gap:5px}
+  .pill{padding:4px 7px;font-size:.72rem}
+  .start{padding:18px;margin:1vh auto}
+  .mode-row{grid-template-columns:1fr}
+  .form-grid,.metaedit{grid-template-columns:1fr}
+  .textcard,.treecard{padding:14px;border-radius:14px}
+  .story{font-size:1.08rem;line-height:1.9}
+  .sectionhead{align-items:center}
+  .target{padding:2px 4px}
+  .btn{flex:1}
+  .actions .btn{min-width:46%}
+  .savebar{border-radius:12px;bottom:6px}
+  .savebar .right{width:100%}
+  .savebar .right .btn{flex:1}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">E+</div>
+      <div><h1>ESMAS-ES+ · Viaxe en tren</h1><small>APP 1 · etiquetado e revisión individual</small></div>
+    </div>
+    <div class="statusline">
+      <span class="pill" id="topPhase">Fase: —</span>
+      <span class="pill" id="topCode">Código: —</span>
+      <span class="pill" id="topText">Texto: —</span>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <noscript>
+    <div class="notice notice-danger" style="max-width:900px;margin:12px auto 18px">
+      <strong>Este visor non está executando JavaScript.</strong><br>
+      A aplicación non pode funcionar neste modo. Abre o ficheiro nun navegador que execute o HTML como páxina web, non nunha previsualización de documentos.
+    </div>
+  </noscript>
+  <section id="startScreen" class="card start">
+    <h2>Comeza ou continúa a túa traxectoria</h2>
+    <p class="lead">Esta aplicación funciona no teu dispositivo. Non envía datos a Internet e non corrixe as túas decisións semánticas.</p>
+
+    <div class="mode-row">
+      <button class="modebtn active" id="modeNewBtn" type="button">
+        <strong>Comezar un novo V0</strong><br><small>Escolle o teu texto e etiqueta as 20 unidades.</small>
+      </button>
+      <button class="modebtn" id="modeLoadBtn" type="button">
+        <strong>Cargar un ficheiro</strong><br><small>Continúa V0→V1, V1→E1 ou E1→V2.</small>
+      </button>
+    </div>
+
+    <div id="newPanel" class="panel">
+      <div class="form-grid">
+        <div class="field">
+          <label for="surname">Primeiro apelido</label>
+          <input id="surname" autocomplete="off" placeholder="Ex.: Valcárcel">
+          <small>Só se usa para xerar o código; non se gardará.</small>
+        </div>
+        <div class="field">
+          <label for="dob">Data de nacemento</label>
+          <input id="dob" type="date">
+          <small>Só se usa para xerar o código; non se gardará.</small>
+        </div>
+        <div class="field">
+          <label>Código xerado</label>
+          <div class="codeout" id="generatedCode">—</div>
+          <small>Xérase automaticamente ao completar apelido e data: 3 letras + DDMMAAAA.</small>
+        </div>
+        <div class="field">
+          <label for="directCode">Ou escribe o teu código</label>
+          <input id="directCode" inputmode="text" autocomplete="off" maxlength="11" placeholder="VAL03091972">
+          <small>Úsao se xa o coñeces.</small>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label for="textSelect">Texto asignado</label>
+          <select id="textSelect">
+            <option value="">— Escolle TXT1, TXT2, TXT3 ou TXT4 —</option>
+            <option value="TXT1">TXT1 · Tours</option>
+            <option value="TXT2">TXT2 · Lyon</option>
+            <option value="TXT3">TXT3 · Annecy</option>
+            <option value="TXT4">TXT4 · Nantes</option>
+          </select>
+        </div>
+      </div>
+      <div id="newValidation"></div>
+      <div id="newWarning"></div>
+      <div class="actions">
+        <button class="btn btn-primary" id="startBtn" disabled>Comezar V0</button>
+      </div>
+    </div>
+
+    <div id="loadPanel" class="panel hidden">
+      <div class="field">
+        <label for="fileInput">Ficheiro JSON</label>
+        <input id="fileInput" type="file" accept=".json,application/json">
+        <small>A aplicación detectará automaticamente se é V0, V1, E1 ou V2.</small>
+      </div>
+      <div id="loadMessage"></div>
+    </div>
+
+    <div class="sources">
+      Fontes incorporadas localmente: <strong>TXT1–TXT4 v1.0</strong> e <strong>Exploration_3.0 ESMAS-ES+ FR</strong>. 
+      Para a actividade só se mostran os niveis 1 e 2. Os exemplos proceden da fonte ESMAS; as glosas breves serven para orientar a navegación.
+    </div>
+  </section>
+
+  <section id="appScreen" class="app">
+    <div id="globalWarning"></div>
+
+    <div class="guidebar" id="guideBar" role="status" aria-live="polite">
+      <div class="guideicon" aria-hidden="true">→</div>
+      <div class="guidecopy">
+        <div class="guidetitle" id="guideTitle">Que tes que facer agora?</div>
+        <div class="guidetext" id="guideText">Escolle unha palabra marcada no texto.</div>
+      </div>
+      <button class="btn btn-primary guideaction hidden" id="guideAction" type="button">Gardar</button>
+    </div>
+
+    <div class="workspace">
+      <article class="card textcard">
+        <div class="sectionhead">
+          <div>
+            <h2 id="storyTitle">—</h2>
+            <p id="phaseInstruction">—</p>
+          </div>
+          <div class="progress">
+            <span id="progressText">0/20</span>
+            <div class="progressbar"><span id="progressBar"></span></div>
+          </div>
+        </div>
+
+        <div id="metaEdit" class="metaedit hidden"></div>
+
+        <div class="legend">
+          <span><i style="background:#fff2a8"></i>pendente</span>
+          <span><i style="background:#dff3e7"></i>etiquetada</span>
+          <span><i style="background:#dce7ff"></i>activa</span>
+        </div>
+
+        <div id="story" class="story"></div>
+
+        <button class="btn btn-secondary mobile-tree-link" id="goTreeBtn" type="button">Ir ás etiquetas ↓</button>
+
+        <div class="targetlist" id="targetList"></div>
+      </article>
+
+      <aside class="card treecard" id="treePanel">
+        <div class="phasebox">
+          <div class="title" id="phaseTitle">—</div>
+          <div class="desc" id="phaseDesc">—</div>
+        </div>
+
+        <div id="activeWord" class="activeword hidden">
+          <div class="lemma" id="activeLemma"></div>
+          <div class="context" id="activeContext"></div>
+          <div class="history" id="historyBox"></div>
+        </div>
+
+        <div id="treeEmpty" class="tree-empty">Preme nunha palabra marcada do texto para comezar.</div>
+        <div id="treeContent" class="hidden">
+          <div class="level-title">Nivel 1</div>
+          <div class="option-grid" id="level1Options"></div>
+          <div class="level-title hidden level2head" id="level2Title"><button type="button" class="backlevel" id="backToL1">← Volver ao nivel 1</button><span>Nivel 2</span></div>
+          <div class="option-grid" id="level2Options"></div>
+          <div id="routeBox" class="routebox hidden">
+            <small>Ruta desta fase</small>
+            <div class="route" id="routeText"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="savebar">
+      <div class="left" id="saveHint">Completa as 20 unidades para gardar.</div>
+      <div class="right">
+        <button class="btn btn-secondary" id="backStartBtn" type="button">Saír</button>
+        <button class="btn btn-primary" id="exportBtn" type="button" disabled>Gardar</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="freeze" id="freezeModal">
+  <div class="modal">
+    <h3 id="freezeTitle">Ficheiro gardado</h3>
+    <p id="freezeText"></p>
+    <div class="notice notice-ok" id="freezeFile"></div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="redownloadBtn">Descargar outra vez</button>
+      <button class="btn btn-primary" id="continueBtn">Continuar</button>
+      <button class="btn btn-secondary" id="finishBtn">Rematar por agora</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"app": {"app_id": "ESMAS-ESPLUS-VIAXE-TREN-APP1", "app_version": "0.5.0", "schema_version": "1.0.0", "ontology_version": "Exploration_3.0_FR_L1-L2", "battery_version": "ESMAS-ES+ Viaxe en tren v1.0", "texts_version": "TXT1-TXT4 v1.0", "generated_at": "2026-09-11", "ontology_source": "Exploration_3.0 de_parcours_ESMAS_ES_plus_FR.html", "texts_source": "MAITE 2026 Textos_intervencion_Viaxe_en_tren_TXT1-TXT4_v1.0"}, "ontology": [{"id": "anim", "label": "Animé", "gloss": "Seres vivos e entidades do ámbito humano, animal ou vexetal.", "children": [{"id": "anim-humain", "label": "Humain", "gloss": "Persoas e outras entidades vinculadas ao ámbito humano.", "examples": ["enfants", "Européen", "mère", "Martin"]}, {"id": "anim-cr-atures-de-fiction", "label": "Créatures de fiction", "gloss": "Seres e personaxes que pertencen á ficción.", "examples": ["fées", "Mickey Mouse", "monstre", "lutin"]}, {"id": "anim-animal", "label": "Animal", "gloss": "Animais e denominacións de seres animais.", "examples": ["chienne", "lionne", "aigle", "requin"]}, {"id": "anim-v-g-tal", "label": "Végétal", "gloss": "Plantas e outras entidades do mundo vexetal.", "examples": ["fleur", "eucalyptus", "rose", "orange"]}, {"id": "anim-parties-du-corps-ou-de-l-tre-vivant", "label": "Parties du corps ou de l’être vivant", "gloss": "Partes do corpo ou doutros seres vivos.", "examples": ["cou", "tête", "peau", "péroné"]}]}, {"id": "mat-riel", "label": "Matériel", "gloss": "Entidades físicas: obxectos e substancias.", "children": [{"id": "mat-riel-objet", "label": "Objet", "gloss": "Entidades físicas identificábeis como obxectos.", "examples": ["cigarette", "ébène", "rubis", "liège"]}, {"id": "mat-riel-substance", "label": "Substance", "gloss": "Materias ou substancias físicas.", "examples": ["sueur", "essence", "sirop", "caca"]}]}, {"id": "intellectuel", "label": "Intellectuel", "gloss": "Entidades abstractas de pensamento, contido e comunicación.", "children": [{"id": "intellectuel-g-n-ral", "label": "Général", "gloss": "Entidades abstractas de pensamento ou coñecemento.", "examples": ["idée", "concept", "connaissance", "pensée"]}, {"id": "intellectuel-contenu", "label": "Contenu", "gloss": "Contidos intelectuais ou informativos.", "examples": ["thème", "texte", "volume", "podcast"]}, {"id": "intellectuel-communication", "label": "Communication", "gloss": "Entidades relacionadas coa comunicación e os seus actos.", "examples": ["galicien", "déclaration", "accord", "offre"]}, {"id": "intellectuel-th-matique", "label": "Thématique", "gloss": "Ámbitos temáticos, ideolóxicos ou de coñecemento.", "examples": ["christianisme", "communisme", "éthique", "biologie"]}, {"id": "intellectuel-syst-mes-d-ordre-conomique", "label": "Systèmes d’ordre (économique)", "gloss": "Conceptos propios de sistemas de organización económica.", "examples": ["impôt sur les sociétés", "TVA", "impôt sur le revenu", "cotisation"]}]}, {"id": "situations-dynamiques", "label": "Situations dynamiques", "gloss": "Procesos, accións, cambios e acontecementos.", "children": [{"id": "situations-dynamiques-g-n-ral", "label": "Général", "gloss": "Procesos ou cambios considerados de maneira xeral.", "examples": ["marée", "lumière", "processus", "changement"]}, {"id": "situations-dynamiques-intentions-et-volont-s", "label": "Intentions et volontés", "gloss": "Accións ou procesos ligados á intención, decisión ou vontade.", "examples": ["braquage", "opération", "coups de feu", "recherche"]}, {"id": "situations-dynamiques-changement", "label": "Changement", "gloss": "Situacións que implican movemento ou transformación.", "examples": ["coup", "glissade", "chute", "saut"]}, {"id": "situations-dynamiques-naturel", "label": "Naturel", "gloss": "Procesos ou fenómenos do mundo natural.", "examples": ["tremblement de terre", "symbiose", "brûlure", "incendie"]}, {"id": "situations-dynamiques-v-nements", "label": "Événements", "gloss": "Feitos ou acontecementos que se producen nun momento ou contexto.", "examples": ["événement", "cause", "crise climatique", "accident"]}, {"id": "situations-dynamiques-activit-s-et-actions", "label": "Activités et actions", "gloss": "Actividades e accións realizadas ou desenvolvidas.", "examples": ["migration", "modernisation", "acquisition", "recherche"]}]}, {"id": "situations-statiques", "label": "Situations statiques", "gloss": "Estados, propiedades e cualidades.", "children": [{"id": "situations-statiques-attributs-ou-qualit-s", "label": "Attributs ou qualités", "gloss": "Propiedades, características ou cualidades relativamente estábeis.", "examples": ["couleur", "non binaire", "hétérosexuel", "personne aveugle"]}, {"id": "situations-statiques-tat-motionnel", "label": "État émotionnel", "gloss": "Estados afectivos ou emocionais.", "examples": ["sentiment", "enthousiasme", "tristesse", "émotion"]}, {"id": "situations-statiques-tat-physique", "label": "État physique", "gloss": "Estados ou condicións físicas.", "examples": ["douleur", "agilité", "fatigue", "faim"]}]}, {"id": "lieu", "label": "Lieu", "gloss": "Lugares, espazos, territorios e contornos.", "children": [{"id": "lieu-g-n-ral", "label": "Général", "gloss": "Lugares ou espazos considerados de maneira xeral.", "examples": ["plage", "forêt", "lieu", "endroit"]}, {"id": "lieu-paysage", "label": "Paysage", "gloss": "Espazos e accidentes da paisaxe.", "examples": ["désert", "Everest", "mer", "Méditerranée"]}, {"id": "lieu-types-de-constructions-et-parties", "label": "Types de constructions et parties", "gloss": "Construcións, edificios e as súas partes entendidos como lugares.", "examples": ["aéroport", "chambre", "carreau", "fenêtre"]}, {"id": "lieu-localit", "label": "Localité", "gloss": "Localidades e espazos propios da organización urbana.", "examples": ["capitale", "route", "passerelle", "tunnel"]}, {"id": "lieu-territoire", "label": "Territoire", "gloss": "Áreas, territorios ou divisións espaciais.", "examples": ["village", "Martinique", "zone", "centre"]}, {"id": "lieu-moyens-de-transport", "label": "Moyens de transport", "gloss": "Espazos asociados a medios de transporte.", "examples": ["char", "moto", "sous-marin", "bombardier"]}, {"id": "lieu-espaces-virtuels", "label": "Espaces virtuels", "gloss": "Espazos ou contornos dixitais.", "examples": ["serveur web", "plateforme éducative", "nuage", "réseau"]}, {"id": "lieu-point-cardinal", "label": "Point cardinal", "gloss": "Orientacións espaciais expresadas mediante puntos cardinais.", "examples": ["nord", "sud"]}]}, {"id": "unit", "label": "Unité", "gloss": "Unidades de tempo, cantidade, medida e outros sistemas de cuantificación.", "children": [{"id": "unit-g-n-ral", "label": "Général", "gloss": "Unidades ou referencias de medida consideradas de maneira xeral.", "examples": ["euro", "téraoctet", "unité", "mesure"]}, {"id": "unit-temps", "label": "Temps", "gloss": "Unidades e referencias para organizar ou medir o tempo.", "examples": ["jours", "Pléistocène", "lundi", "matin"]}, {"id": "unit-quantit", "label": "Quantité", "gloss": "Unidades e expresións de cantidade.", "examples": ["tas", "deux", "20%", "moitié"]}, {"id": "unit-mon-taire", "label": "Monétaire", "gloss": "Unidades monetarias.", "examples": ["euro", "dollar", "livre", "yen"]}, {"id": "unit-mesure", "label": "Mesure", "gloss": "Unidades de medida física.", "examples": ["centimètres", "yards", "millimètres", "kilomètres"]}, {"id": "unit-information-num-rique", "label": "Information numérique", "gloss": "Unidades empregadas para medir información dixital.", "examples": ["mégaoctet", "gigaoctet", "téraoctet", "bit"]}, {"id": "unit-puissance", "label": "Puissance", "gloss": "Unidades empregadas para medir potencia.", "examples": ["watt", "kilowatt", "mégawatt", "cheval-vapeur"]}]}], "texts": {"TXT1": {"title": "TXT1 · Tours", "text": "Lundi matin, je commence un voyage à Tours. À la gare, je vois des touristes un peu inquiets. Une information annonce un retard après un accident. Un voyageur attend près de moi et un étudiant regarde aussi le train. L’étudiant reçoit un courriel avec une invitation, mais il reste calme. Moi, j’ai un peu peur, surtout quand le retard continue. Enfin, le train arrive et je trouve ma place. Je garde mon appareil photo avec moi. Le temps est gris, mais le voyage est agréable. Je me sens déjà plus calme. À Tours, un guide nous attend et nous accompagne au musée. Je parle avec le voyageur et l’étudiant. Ma peur disparaît petit à petit. Finalement, j’ai un sentiment positif.", "targets": [{"target_id": "TXT1-U01", "lemma": "touriste", "forms": ["touriste", "touristes"], "source_mismatch": false}, {"target_id": "TXT1-U02", "lemma": "train", "forms": ["train", "trains"], "source_mismatch": false}, {"target_id": "TXT1-U03", "lemma": "information", "forms": ["information", "informations"], "source_mismatch": false}, {"target_id": "TXT1-U04", "lemma": "voyage", "forms": ["voyage", "voyages"], "source_mismatch": false}, {"target_id": "TXT1-U05", "lemma": "gare", "forms": ["gare", "gares"], "source_mismatch": false}, {"target_id": "TXT1-U06", "lemma": "guide", "forms": ["guide", "guides"], "source_mismatch": false}, {"target_id": "TXT1-U07", "lemma": "temps", "forms": ["temps"], "source_mismatch": false}, {"target_id": "TXT1-U08", "lemma": "place", "forms": ["place", "places"], "source_mismatch": false}, {"target_id": "TXT1-U09", "lemma": "voyageur", "forms": ["voyageur", "voyageurs"], "source_mismatch": false}, {"target_id": "TXT1-U10", "lemma": "étudiant", "forms": ["étudiant", "étudiants"], "source_mismatch": false}, {"target_id": "TXT1-U11", "lemma": "appareil photo", "forms": ["appareil photo", "appareils photo"], "source_mismatch": false}, {"target_id": "TXT1-U12", "lemma": "courriel", "forms": ["courriel", "courriels"], "source_mismatch": false}, {"target_id": "TXT1-U13", "lemma": "invitation", "forms": ["invitation", "invitations"], "source_mismatch": false}, {"target_id": "TXT1-U14", "lemma": "retard", "forms": ["retard", "retards"], "source_mismatch": false}, {"target_id": "TXT1-U15", "lemma": "accident", "forms": ["accident", "accidents"], "source_mismatch": false}, {"target_id": "TXT1-U16", "lemma": "peur", "forms": ["peur", "peurs"], "source_mismatch": false}, {"target_id": "TXT1-U17", "lemma": "sentiment", "forms": ["sentiment", "sentiments"], "source_mismatch": false}, {"target_id": "TXT1-U18", "lemma": "musée", "forms": ["musée", "musées"], "source_mismatch": false}, {"target_id": "TXT1-U19", "lemma": "matin", "forms": ["matin", "matins"], "source_mismatch": false}, {"target_id": "TXT1-U20", "lemma": "lundi", "forms": ["lundi", "lundis"], "source_mismatch": false}]}, "TXT2": {"title": "TXT2 · Lyon", "text": "Samedi après-midi, je fais un voyage à Lyon. Dans le train, je lis un guide parce que je n’ai pas beaucoup de temps. Je suis touriste et je veux découvrir Lyon tranquillement. À la gare, une information m’aide à aller vers une grande place. Mon cousin et ma sœur m’attendent là. Nous prenons un vélo et nous faisons une promenade jusqu’au parc. Ma sœur parle souvent de littérature et mon cousin préfère le film que nous voulons voir plus tard. Je fais aussi un petit achat avec eux. Ces moments renforcent beaucoup notre amitié. Mon opinion sur Lyon est très positive. Je retourne ensuite à la gare, je monte dans le train et je pense déjà à un autre voyage.", "targets": [{"target_id": "TXT2-U01", "lemma": "touriste", "forms": ["touriste", "touristes"], "source_mismatch": false}, {"target_id": "TXT2-U02", "lemma": "train", "forms": ["train", "trains"], "source_mismatch": false}, {"target_id": "TXT2-U03", "lemma": "information", "forms": ["information", "informations"], "source_mismatch": false}, {"target_id": "TXT2-U04", "lemma": "voyage", "forms": ["voyage", "voyages"], "source_mismatch": false}, {"target_id": "TXT2-U05", "lemma": "gare", "forms": ["gare", "gares"], "source_mismatch": false}, {"target_id": "TXT2-U06", "lemma": "guide", "forms": ["guide", "guides"], "source_mismatch": false}, {"target_id": "TXT2-U07", "lemma": "temps", "forms": ["temps"], "source_mismatch": false}, {"target_id": "TXT2-U08", "lemma": "place", "forms": ["place", "places"], "source_mismatch": false}, {"target_id": "TXT2-U09", "lemma": "cousin", "forms": ["cousin", "cousins"], "source_mismatch": false}, {"target_id": "TXT2-U10", "lemma": "sœur", "forms": ["sœur", "sœurs"], "source_mismatch": false}, {"target_id": "TXT2-U11", "lemma": "vélo", "forms": ["vélo", "vélos"], "source_mismatch": false}, {"target_id": "TXT2-U12", "lemma": "film", "forms": ["film", "films"], "source_mismatch": false}, {"target_id": "TXT2-U13", "lemma": "littérature", "forms": ["littérature"], "source_mismatch": false}, {"target_id": "TXT2-U14", "lemma": "promenade", "forms": ["promenade", "promenades"], "source_mismatch": false}, {"target_id": "TXT2-U15", "lemma": "achat", "forms": ["achat", "achats"], "source_mismatch": false}, {"target_id": "TXT2-U16", "lemma": "amitié", "forms": ["amitié"], "source_mismatch": false}, {"target_id": "TXT2-U17", "lemma": "opinion", "forms": ["opinion", "opinions"], "source_mismatch": false}, {"target_id": "TXT2-U18", "lemma": "parc", "forms": ["parc", "parcs"], "source_mismatch": false}, {"target_id": "TXT2-U19", "lemma": "après-midi", "forms": ["après-midi"], "source_mismatch": false}, {"target_id": "TXT2-U20", "lemma": "samedi", "forms": ["samedi", "samedis"], "source_mismatch": false}]}, "TXT3": {"title": "TXT3 · Annecy", "text": "En juillet, pendant l’été, je fais un voyage en train à Annecy. À la gare, je lis des informations destinées aux touristes et je décide d’aller sur une place très animée du centre-ville. Un guide nous attend et nous propose une excursion sur le lac. Alors, nous prenons un bateau. Près du lac, je vois des fleurs et des papillons. Le guide raconte un conte et il parle aussi d’un documentaire sur le lac. Il commence à pleuvoir, mais la pluie est légère. Ensuite, la chaleur revient et le temps est agréable. Je suis un peu fatigué, mais j’ai encore de la force. Nous restons près du lac et le guide nous donne encore beaucoup d’informations. Ce voyage me plaît énormément.", "targets": [{"target_id": "TXT3-U01", "lemma": "touriste", "forms": ["touriste", "touristes"], "source_mismatch": false}, {"target_id": "TXT3-U02", "lemma": "train", "forms": ["train", "trains"], "source_mismatch": false}, {"target_id": "TXT3-U03", "lemma": "information", "forms": ["information", "informations"], "source_mismatch": false}, {"target_id": "TXT3-U04", "lemma": "voyage", "forms": ["voyage", "voyages"], "source_mismatch": false}, {"target_id": "TXT3-U05", "lemma": "gare", "forms": ["gare", "gares"], "source_mismatch": false}, {"target_id": "TXT3-U06", "lemma": "guide", "forms": ["guide", "guides"], "source_mismatch": false}, {"target_id": "TXT3-U07", "lemma": "temps", "forms": ["temps"], "source_mismatch": false}, {"target_id": "TXT3-U08", "lemma": "place", "forms": ["place", "places"], "source_mismatch": false}, {"target_id": "TXT3-U09", "lemma": "fleur", "forms": ["fleur", "fleurs"], "source_mismatch": false}, {"target_id": "TXT3-U10", "lemma": "papillon", "forms": ["papillon", "papillons"], "source_mismatch": false}, {"target_id": "TXT3-U11", "lemma": "bateau", "forms": ["bateau", "bateaux"], "source_mismatch": false}, {"target_id": "TXT3-U12", "lemma": "documentaire", "forms": ["documentaire", "documentaires"], "source_mismatch": false}, {"target_id": "TXT3-U13", "lemma": "conte", "forms": ["conte", "contes"], "source_mismatch": false}, {"target_id": "TXT3-U14", "lemma": "excursion", "forms": ["excursion", "excursions"], "source_mismatch": false}, {"target_id": "TXT3-U15", "lemma": "pluie", "forms": ["pluie", "pluies"], "source_mismatch": false}, {"target_id": "TXT3-U16", "lemma": "chaleur", "forms": ["chaleur", "chaleurs"], "source_mismatch": false}, {"target_id": "TXT3-U17", "lemma": "force", "forms": ["force", "forces"], "source_mismatch": false}, {"target_id": "TXT3-U18", "lemma": "lac", "forms": ["lac", "lacs"], "source_mismatch": false}, {"target_id": "TXT3-U19", "lemma": "été", "forms": ["été", "étés"], "source_mismatch": false}, {"target_id": "TXT3-U20", "lemma": "juillet", "forms": ["juillet"], "source_mismatch": false}]}, "TXT4": {"title": "TXT4 · Nantes", "text": "Au printemps, un mardi, je fais un voyage en train à Nantes. Dans le train, je trouve ma place et je regarde ma montre. Je n’ai pas beaucoup de temps, alors je consulte un guide de tourisme. À la gare, une information présente une activité pour des touristes dans un parc. Je vais au parc et je rencontre une policière avec un homme. La policière me montre un journal et un article sur cette activité. Je lis rapidement et je donne mon opinion. L’homme me parle de la fréquence des trains, car il voyage souvent. Mon guide contient aussi des informations utiles. Je reste encore un peu dans le parc avant de retourner à la gare. C’est un voyage amusant.", "targets": [{"target_id": "TXT4-U01", "lemma": "touriste", "forms": ["touriste", "touristes"], "source_mismatch": false}, {"target_id": "TXT4-U02", "lemma": "train", "forms": ["train", "trains"], "source_mismatch": false}, {"target_id": "TXT4-U03", "lemma": "information", "forms": ["information", "informations"], "source_mismatch": false}, {"target_id": "TXT4-U04", "lemma": "voyage", "forms": ["voyage", "voyages"], "source_mismatch": false}, {"target_id": "TXT4-U05", "lemma": "gare", "forms": ["gare", "gares"], "source_mismatch": false}, {"target_id": "TXT4-U06", "lemma": "guide", "forms": ["guide", "guides"], "source_mismatch": false}, {"target_id": "TXT4-U07", "lemma": "temps", "forms": ["temps"], "source_mismatch": false}, {"target_id": "TXT4-U08", "lemma": "place", "forms": ["place", "places"], "source_mismatch": false}, {"target_id": "TXT4-U09", "lemma": "policière", "forms": ["policière", "policières"], "source_mismatch": false}, {"target_id": "TXT4-U10", "lemma": "monsieur", "forms": ["homme", "hommes"], "source_mismatch": true}, {"target_id": "TXT4-U11", "lemma": "montre", "forms": ["montre", "montres"], "source_mismatch": false}, {"target_id": "TXT4-U12", "lemma": "journal", "forms": ["journal", "journaux"], "source_mismatch": false}, {"target_id": "TXT4-U13", "lemma": "article", "forms": ["article", "articles"], "source_mismatch": false}, {"target_id": "TXT4-U14", "lemma": "activité", "forms": ["activité", "activités"], "source_mismatch": false}, {"target_id": "TXT4-U15", "lemma": "tourisme", "forms": ["tourisme"], "source_mismatch": false}, {"target_id": "TXT4-U16", "lemma": "opinion", "forms": ["opinion", "opinions"], "source_mismatch": false}, {"target_id": "TXT4-U17", "lemma": "fréquence", "forms": ["fréquence", "fréquences"], "source_mismatch": false}, {"target_id": "TXT4-U18", "lemma": "parc", "forms": ["parc", "parcs"], "source_mismatch": false}, {"target_id": "TXT4-U19", "lemma": "printemps", "forms": ["printemps"], "source_mismatch": false}, {"target_id": "TXT4-U20", "lemma": "mardi", "forms": ["mardi", "mardis"], "source_mismatch": false}], "sourceWarning": "Na fonte TXT4, a listaxe das 20 unidades indica «monsieur», mais o texto corrido contén «homme». Para manter 20/20 nesta versión, a ocorrencia «homme» queda ligada provisionalmente á unidade listada «monsieur». Cómpre validar esta incidencia antes do uso definitivo."}}};
+
+const APP = DATA.app;
+const phaseMeta = {
+  V0:{title:"V0 · Etiquetado individual inicial",desc:"Etiqueta as 20 unidades pola túa conta. Esta é a túa primeira decisión.",next:"V1"},
+  V1:{title:"V1 · Revisión tras o grupo de orixe",desc:"Contrasta as túas dúbidas co grupo. A decisión que gardas nesta fase segue sendo individual.",next:"E1"},
+  E1:{title:"E1 · Revisión tras o grupo de expertos",desc:"Compara as 20 unidades con quen traballou o mesmo texto. Non é necesario que todos escollades o mesmo.",next:"V2"},
+  V2:{title:"V2 · Revisión final individual",desc:"De volta ao grupo de orixe, revisa as túas decisións. V2 é o último estado individual.",next:null}
+};
+
+let state = {
+  mode:"new", phase:null, participant_code:null, text_id:null,
+  origin_group_id:null, expert_group_id:null,
+  history:{}, active_target_id:null,
+  parent_id:null, parent_hash:null, source_file_id:null,
+  frozen:false, lastExport:null, lastExportName:null, parentRaw:null, tree_step:"L1", pending_l1_id:null, just_completed:null
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+const norm = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z]/g,"");
+const codeRegex = /^[A-Z]{3}\d{8}$/;
+
+function readBirthDateParts(){
+  const input=$("dob");
+
+  // 1) Standard HTML date value: YYYY-MM-DD
+  const raw=String(input.value||"").trim();
+  const m=raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m) return {y:m[1],m:m[2],d:m[3]};
+
+  // 2) iOS/WebKit fallback: Date object supplied by the native picker
+  const dt=input.valueAsDate;
+  if(dt instanceof Date && !Number.isNaN(dt.getTime())){
+    const y=String(dt.getUTCFullYear()).padStart(4,"0");
+    const mo=String(dt.getUTCMonth()+1).padStart(2,"0");
+    const d=String(dt.getUTCDate()).padStart(2,"0");
+    return {y,m:mo,d};
+  }
+  return null;
+}
+
+function generateCode(){
+  const sn=norm($("surname").value).slice(0,3);
+  const bd=readBirthDateParts();
+
+  if(sn.length===3 && bd){
+    const code=sn+bd.d+bd.m+bd.y;
+    $("generatedCode").textContent=code;
+    $("generatedCode").dataset.code=code;
+  }else{
+    $("generatedCode").textContent="—";
+    $("generatedCode").dataset.code="";
+  }
+  validateNew();
+}
+
+function scheduleCodeGeneration(){
+  generateCode();
+  setTimeout(generateCode,80);
+  setTimeout(generateCode,250);
+}
+
+function chosenCode(){
+  const direct = $("directCode").value.trim().toUpperCase().replace(/\s+/g,"");
+  if(codeRegex.test(direct)) return direct;
+  const gen = ($("generatedCode").dataset.code || $("generatedCode").textContent || "").trim();
+  return codeRegex.test(gen)?gen:null;
+}
+function validateNew(){
+  const code=chosenCode(), tid=$("textSelect").value;
+  const codeOk=!!code;
+  const textOk=!!DATA.texts[tid];
+
+  $("startBtn").disabled=!(codeOk&&textOk);
+
+  let msg="";
+  if(!codeOk && !textOk){
+    msg="Falta xerar ou escribir un código válido e escoller o texto asignado.";
+  }else if(!codeOk){
+    msg="Falta un código válido. Completa apelido + data ou escríbeo manualmente.";
+  }else if(!textOk){
+    msg=`Código listo: ${code}. Agora escolle o texto asignado para activar «Comezar V0».`;
+  }else{
+    msg=`Todo listo: ${code} · ${tid}. Xa podes comezar V0.`;
+  }
+  $("newValidation").innerHTML=`<div class="notice ${codeOk&&textOk?"notice-ok":"notice-info"}">${esc(msg)}</div>`;
+
+  $("newWarning").innerHTML = tid==="TXT4" && DATA.texts.TXT4.sourceWarning
+    ? `<div class="notice notice-warn">${esc(DATA.texts.TXT4.sourceWarning)}</div>`:"";
+}
+["input","change","blur"].forEach(ev=>$("surname").addEventListener(ev,scheduleCodeGeneration));
+["input","change","blur"].forEach(ev=>$("dob").addEventListener(ev,scheduleCodeGeneration));
+["input","change","blur"].forEach(ev=>$("directCode").addEventListener(ev,e=>{
+  e.target.value=e.target.value.toUpperCase().replace(/\s+/g,"");
+  validateNew();
+}));
+["input","change","blur"].forEach(ev=>$("textSelect").addEventListener(ev,validateNew));
+
+// Primeira sincronización ao cargar a páxina.
+scheduleCodeGeneration();
+validateNew();
+
+// Salvagarda para selectores nativos de iOS: mentres estamos na pantalla inicial,
+// revisamos discretamente os valores por se WebKit non emite o evento esperado.
+setInterval(()=>{
+  if($("startScreen") && $("startScreen").style.display!=="none"){
+    generateCode();
+  }
+},500);
+
+function setMode(mode){
+  state.mode=mode;
+  $("modeNewBtn").classList.toggle("active",mode==="new");
+  $("modeLoadBtn").classList.toggle("active",mode==="load");
+  $("newPanel").classList.toggle("hidden",mode!=="new");
+  $("loadPanel").classList.toggle("hidden",mode!=="load");
+}
+$("modeNewBtn").onclick=()=>setMode("new");
+$("modeLoadBtn").onclick=()=>setMode("load");
+
+function blankHistory(tid){
+  const out={};
+  DATA.texts[tid].targets.forEach(t=>out[t.target_id]={V0:null,V1:null,E1:null,V2:null});
+  return out;
+}
+function routeObj(l1,l2){
+  if(!l1||!l2) return null;
+  return {level_1_id:l1.id,level_1_label:l1.label,level_2_id:l2.id,level_2_label:l2.label};
+}
+function phaseRoute(targetId, phase=state.phase){
+  return state.history[targetId]?.[phase] || null;
+}
+function currentText(){return DATA.texts[state.text_id];}
+function targetById(id){return currentText().targets.find(t=>t.target_id===id);}
+function pairFromRoute(r){
+  if(!r) return [null,null];
+  const l1=DATA.ontology.find(x=>x.id===r.level_1_id || x.label===r.level_1_label);
+  const l2=l1?.children.find(x=>x.id===r.level_2_id || x.label===r.level_2_label);
+  return [l1,l2];
+}
+function contextFor(target){
+  const txt=currentText().text;
+  for(const f of target.forms){
+    const i=txt.toLocaleLowerCase("fr").indexOf(f.toLocaleLowerCase("fr"));
+    if(i>=0){
+      const start=Math.max(0,txt.lastIndexOf(".",i-1)+1);
+      let end=txt.indexOf(".",i);
+      if(end<0)end=txt.length-1;
+      return txt.slice(start,end+1).trim();
+    }
+  }
+  return "";
+}
+
+function startNew(){
+  const code=chosenCode(), tid=$("textSelect").value;
+  if(!code||!DATA.texts[tid])return;
+  state={
+    mode:"new",phase:"V0",participant_code:code,text_id:tid,
+    origin_group_id:null,expert_group_id:null,history:blankHistory(tid),
+    active_target_id:null,parent_id:null,parent_hash:null,source_file_id:null,
+    frozen:false,lastExport:null,lastExportName:null,parentRaw:null,tree_step:"L1",pending_l1_id:null
+  };
+  showApp();
+}
+$("startBtn").onclick=startNew;
+
+function showApp(){
+  $("startScreen").style.display="none";
+  $("appScreen").style.display="block";
+  updateTop();
+  renderMetaEdit();
+  renderStory();
+  renderTargets();
+  renderTree();
+  renderProgress();
+  renderGuide();
+  const tw=currentText();
+  $("storyTitle").textContent=tw.title;
+  $("phaseInstruction").textContent=phaseMeta[state.phase].desc;
+  $("phaseTitle").textContent=phaseMeta[state.phase].title;
+  $("phaseDesc").textContent=phaseMeta[state.phase].desc;
+  $("globalWarning").innerHTML=tw.sourceWarning?`<div class="notice notice-warn">${esc(tw.sourceWarning)}</div>`:"";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function updateTop(){
+  $("topPhase").innerHTML=`Fase: <strong>${esc(state.phase||"—")}</strong>`;
+  $("topCode").innerHTML=`Código: <strong>${esc(state.participant_code||"—")}</strong>`;
+  $("topText").innerHTML=`Texto: <strong>${esc(state.text_id||"—")}</strong>`;
+}
+function renderMetaEdit(){
+  const box=$("metaEdit");
+  if(state.phase==="V1"){
+    box.classList.remove("hidden");
+    box.innerHTML=`<div class="field" style="grid-column:1/-1"><label for="originGroup">Código do grupo de orixe</label>
+      <input id="originGroup" maxlength="16" placeholder="Ex.: G03" value="${esc(state.origin_group_id||"")}">
+      <small>Escribe o código que vos indicou o profesorado. Gardarase en V1, E1 e V2.</small></div>`;
+    $("originGroup").addEventListener("input",e=>{state.origin_group_id=e.target.value.toUpperCase().trim();renderProgress();renderGuide();});
+  } else if(state.phase==="E1"){
+    box.classList.remove("hidden");
+    box.innerHTML=`<div class="field" style="grid-column:1/-1"><label for="expertGroup">Código do grupo experto (só se o profesorado o indica)</label>
+      <input id="expertGroup" maxlength="16" placeholder="Opcional, ex.: X2-01" value="${esc(state.expert_group_id||"")}">
+      <small>Se hai un único grupo experto por texto, podes deixalo baleiro.</small></div>`;
+    $("expertGroup").addEventListener("input",e=>{state.expert_group_id=e.target.value.toUpperCase().trim();});
+  } else box.classList.add("hidden");
+}
+
+function buildFormMap(){
+  const map=new Map();
+  currentText().targets.forEach(t=>t.forms.forEach(f=>map.set(f.toLocaleLowerCase("fr"),t)));
+  return map;
+}
+function renderStory(){
+  const td=currentText(), formMap=buildFormMap();
+  const forms=[...formMap.keys()].sort((a,b)=>b.length-a.length).map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
+  const rx=new RegExp(`(?<![\\p{L}\\p{N}])(${forms.join("|")})(?![\\p{L}\\p{N}])`,"giu");
+  let last=0, out="", m;
+  while((m=rx.exec(td.text))!==null){
+    out+=esc(td.text.slice(last,m.index));
+    const target=formMap.get(m[0].toLocaleLowerCase("fr"));
+    const r=phaseRoute(target.target_id);
+    const cls=["target",r?"done":"",state.active_target_id===target.target_id?"active":"",target.source_mismatch?"mismatch":""].filter(Boolean).join(" ");
+    out+=`<button type="button" class="${cls}" data-target="${target.target_id}" aria-label="Etiquetar ${esc(target.lemma)}">${esc(m[0])}</button>`;
+    last=rx.lastIndex;
+  }
+  out+=esc(td.text.slice(last));
+  $("story").innerHTML=out;
+  $("story").querySelectorAll("[data-target]").forEach(b=>b.onclick=()=>selectTarget(b.dataset.target));
+}
+function renderTargets(){
+  $("targetList").innerHTML=currentText().targets.map(t=>{
+    const done=!!phaseRoute(t.target_id);
+    const cls=["targetchip",done?"done":"",state.active_target_id===t.target_id?"active":"",t.source_mismatch?"mismatch":""].filter(Boolean).join(" ");
+    return `<button type="button" class="${cls}" data-chip="${t.target_id}">${esc(t.lemma)}${t.source_mismatch?"*":""}</button>`;
+  }).join("");
+  $("targetList").querySelectorAll("[data-chip]").forEach(b=>b.onclick=()=>selectTarget(b.dataset.chip));
+}
+function selectTarget(id){
+  if(state.frozen)return;
+  state.active_target_id=id;
+  state.tree_step="L1";
+  state.pending_l1_id=null;
+  state.just_completed=null;
+  renderStory();renderTargets();renderTree();renderGuide();
+  if(window.innerWidth<981) $("treePanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("goTreeBtn").onclick=()=>$("treePanel").scrollIntoView({behavior:"smooth",block:"start"});
+
+function renderTree(){
+  const id=state.active_target_id;
+  if(!id){
+    $("activeWord").classList.add("hidden");
+    $("treeEmpty").classList.remove("hidden");
+    $("treeContent").classList.add("hidden");
+    return;
+  }
+
+  const t=targetById(id), current=phaseRoute(id);
+  $("treeEmpty").classList.add("hidden");
+  $("treeContent").classList.remove("hidden");
+  $("activeWord").classList.remove("hidden");
+  $("activeLemma").textContent=t.lemma+(t.source_mismatch?"*":"");
+  $("activeContext").textContent=contextFor(t) || "Non se localizou contexto automático.";
+
+  const phases=["V0","V1","E1","V2"];
+  $("historyBox").innerHTML=phases.filter(p=>state.history[id]?.[p]).map(p=>{
+    const r=state.history[id][p];
+    return `<span class="hist"><strong>${p}</strong> · ${esc(r.level_1_label)} → ${esc(r.level_2_label)}</span>`;
+  }).join("") || `<span class="hist">Aínda sen historial</span>`;
+
+  const [curL1,curL2]=pairFromRoute(current);
+
+  // Paso 1: sempre se mostra unicamente o primeiro nivel.
+  if(state.tree_step!=="L2"){
+    $("level1Options").parentElement?.classList?.remove("hidden");
+    $("level1Options").classList.remove("hidden");
+    $("level2Title").classList.add("hidden");
+    $("level2Options").classList.add("hidden");
+
+    $("level1Options").innerHTML=DATA.ontology.map(l1=>`
+      <button type="button" class="option ${curL1?.id===l1.id?"selected":""}" data-l1="${l1.id}">
+        <div class="olabel">${esc(l1.label)}</div>
+        <div class="ogloss">${esc(l1.gloss)}</div>
+      </button>`).join("");
+    $("level1Options").querySelectorAll("[data-l1]").forEach(b=>b.onclick=()=>chooseL1(b.dataset.l1));
+
+    if(current){
+      $("routeBox").classList.remove("hidden");
+      $("routeText").textContent=`${current.level_1_label} → ${current.level_2_label}`;
+    } else {
+      $("routeBox").classList.add("hidden");
+    }
+    return;
+  }
+
+  // Paso 2: ao escoller Nivel 1, desaparece o primeiro nivel e só se mostra o segundo.
+  const l1id=state.pending_l1_id || curL1?.id;
+  const l1=DATA.ontology.find(x=>x.id===l1id);
+  if(!l1){
+    state.tree_step="L1";
+    state.pending_l1_id=null;
+    renderTree();
+    return;
+  }
+
+  $("level1Options").classList.add("hidden");
+  renderL2(l1, (curL1?.id===l1.id ? curL2 : null));
+}
+
+function chooseL1(l1id){
+  const l1=DATA.ontology.find(x=>x.id===l1id);
+  if(!l1)return;
+  state.pending_l1_id=l1id;
+  state.tree_step="L2";
+  state.just_completed=null;
+  renderTree();
+  renderGuide();
+}
+
+function goBackToL1(){
+  if(state.frozen)return;
+  state.tree_step="L1";
+  state.pending_l1_id=null;
+  state.just_completed=null;
+  renderTree();
+  renderGuide();
+}
+
+function renderL2(l1, selected){
+  $("level2Title").classList.remove("hidden");
+  $("level2Options").classList.remove("hidden");
+  $("level2Options").innerHTML=l1.children.map(l2=>`
+    <button type="button" class="option ${selected?.id===l2.id?"selected":""}" data-l2="${l2.id}" data-parent="${l1.id}">
+      <div class="olabel">${esc(l2.label)}</div>
+      <div class="ogloss">${esc(l2.gloss)}</div>
+      <div class="examples">${l2.examples.map(e=>`<span class="ex">${esc(e)}</span>`).join("")}</div>
+    </button>`).join("");
+  $("level2Options").querySelectorAll("[data-l2]").forEach(b=>b.onclick=()=>chooseL2(b.dataset.parent,b.dataset.l2));
+
+  const cur=phaseRoute(state.active_target_id);
+  if(cur){
+    $("routeBox").classList.remove("hidden");
+    $("routeText").textContent=`${cur.level_1_label} → ${cur.level_2_label}`;
+  } else {
+    $("routeBox").classList.add("hidden");
+  }
+}
+
+function chooseL2(l1id,l2id){
+  if(state.frozen)return;
+  const l1=DATA.ontology.find(x=>x.id===l1id), l2=l1?.children.find(x=>x.id===l2id);
+  if(!l1||!l2)return;
+
+  const completedId=state.active_target_id;
+  const completedTarget=targetById(completedId);
+  state.history[completedId][state.phase]=routeObj(l1,l2);
+
+  // Vai automaticamente á seguinte palabra aínda non etiquetada nesta fase.
+  const targets=currentText().targets;
+  const currentIndex=targets.findIndex(t=>t.target_id===completedId);
+  let next=null;
+  for(let offset=1; offset<=targets.length; offset++){
+    const candidate=targets[(currentIndex+offset)%targets.length];
+    if(!phaseRoute(candidate.target_id)){ next=candidate; break; }
+  }
+
+  if(next){
+    state.active_target_id=next.target_id;
+    state.tree_step="L1";
+    state.pending_l1_id=null;
+    state.just_completed={previous:completedTarget.lemma,next:next.lemma};
+  } else {
+    // Todo completo: mantemos a última palabra activa para poder revisala.
+    state.tree_step="L2";
+    state.pending_l1_id=l1id;
+    state.just_completed={previous:completedTarget.lemma,next:null};
+  }
+
+  renderStory();renderTargets();renderTree();renderProgress();renderGuide();
+
+  // En móbil/tableta pequena, mantemos o panel de etiquetas visible.
+  if(next && window.innerWidth<981){
+    $("treePanel").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+}
+
+$("backToL1").onclick=goBackToL1;
+
+
+function renderGuide(){
+  if(!state.phase || !currentText()) return;
+
+  const title=$("guideTitle"), body=$("guideText"), action=$("guideAction");
+  action.classList.add("hidden");
+  action.onclick=null;
+
+  const n=countDone();
+
+  if(state.frozen){
+    title.textContent="Fase gardada";
+    body.textContent=`${state.phase} xa foi gardado. Podes descargar de novo o ficheiro ou continuar coa seguinte fase cando corresponda.`;
+    return;
+  }
+
+  // Nas fases herdadas (V1/E1/V2), as 20 rutas xa veñen da fase anterior.
+  if(state.phase!=="V0" && n===20 && !state.active_target_id){
+    title.textContent=`${state.phase} · Revisa as túas etiquetas`;
+    body.textContent="As 20 palabras conservan a etiqueta da fase anterior. Preme en calquera palabra que queiras revisar ou cambiar. Cando remates, garda esta fase.";
+    if(metaValid()){
+      action.textContent=`Gardar ${state.phase}`;
+      action.classList.remove("hidden");
+      action.onclick=exportCurrent;
+    }
+    return;
+  }
+
+  if(n===20){
+    title.textContent="Xa etiquetaches as 20 palabras";
+    if(state.phase==="V1" && !metaValid()){
+      body.textContent="Se queres revisar algunha palabra, volve premer nela e cambia a ruta. Para gardar V1, indica tamén o código do grupo de orixe.";
+      return;
+    }
+    body.textContent="Se queres revisar algunha palabra, volve premer nela e cambia as etiquetas. Se non, xa podes gardar o teu traballo.";
+    action.textContent=`Gardar ${state.phase}`;
+    action.classList.remove("hidden");
+    action.onclick=exportCurrent;
+    return;
+  }
+
+  if(!state.active_target_id){
+    title.textContent="Paso 1 · Escolle unha palabra";
+    body.textContent=`Preme nunha palabra marcada en amarelo. Levas ${n} de 20 palabras etiquetadas.`;
+    return;
+  }
+
+  const t=targetById(state.active_target_id);
+
+  if(state.tree_step==="L1"){
+    title.textContent=`Paso 1 de 2 · ${t.lemma}`;
+    if(state.just_completed?.next===t.lemma){
+      body.textContent=`Feito: «${state.just_completed.previous}» quedou etiquetada. Agora escolle unha etiqueta de nivel 1 para «${t.lemma}».`;
+    } else {
+      body.textContent=`Escolle unha etiqueta de nivel 1 para «${t.lemma}».`;
+    }
+    return;
+  }
+
+  if(state.tree_step==="L2"){
+    const l1=DATA.ontology.find(x=>x.id===state.pending_l1_id);
+    title.textContent=`Paso 2 de 2 · ${t.lemma}`;
+    body.textContent=`Escolliches «${l1?.label||"Nivel 1"}». Fai scroll se é necesario e escolle agora unha etiqueta de nivel 2. Podes volver atrás se queres cambiar o nivel 1.`;
+    return;
+  }
+}
+function countDone(){
+  return currentText().targets.filter(t=>!!phaseRoute(t.target_id)).length;
+}
+function metaValid(){
+  if(state.phase==="V1") return !!String(state.origin_group_id||"").trim();
+  return true;
+}
+function renderProgress(){
+  const n=countDone(), pct=n/20*100;
+  $("progressText").textContent=`${n}/20`;
+  $("progressBar").style.width=`${pct}%`;
+  const complete=n===20 && metaValid() && !state.frozen;
+  $("exportBtn").disabled=!complete;
+  $("exportBtn").textContent=`Gardar ${state.phase}`;
+  let hint=n<20?`Faltan ${20-n} unidades por etiquetar.`:"";
+  if(n===20 && state.phase==="V1" && !metaValid())hint="Indica o código do grupo de orixe para gardar V1.";
+  if(complete)hint=`Todo listo para gardar ${state.phase}.`;
+  if(state.frozen)hint=`${state.phase} xa foi gardado e está bloqueado nesta sesión.`;
+  $("saveHint").textContent=hint;
+}
+function fnv1a(str){
+  let h=0x811c9dc5;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}
+  return ("00000000"+(h>>>0).toString(16)).slice(-8);
+}
+function makeId(){
+  if(globalThis.crypto?.randomUUID)return crypto.randomUUID();
+  return "f-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10);
+}
+function statusBetween(prev,current){
+  if(!prev)return null;
+  return prev.level_1_id===current.level_1_id && prev.level_2_id===current.level_2_id ? "maintained":"changed";
+}
+function buildExport(){
+  const p=state.phase;
+  const prev={V0:null,V1:"V0",E1:"V1",V2:"E1"}[p];
+  const annotations=currentText().targets.map(t=>{
+    const h=state.history[t.target_id];
+    const curr=h[p];
+    return {
+      target_id:t.target_id,
+      lemma:t.lemma,
+      surface_forms:t.forms,
+      context:contextFor(t),
+      source_mismatch:!!t.source_mismatch,
+      current_route:curr,
+      transition_status: prev?statusBetween(h[prev],curr):null,
+      history:h
+    };
+  });
+  return {
+    kind:"ESMAS_ESPLUS_VIAXE_TREN_INDIVIDUAL",
+    schema_version:APP.schema_version,
+    app_version:APP.app_version,
+    ontology_version:APP.ontology_version,
+    battery_version:APP.battery_version,
+    texts_version:APP.texts_version,
+    phase:p,
+    participant_code:state.participant_code,
+    origin_group_id:state.origin_group_id||null,
+    expert_group_id:state.expert_group_id||null,
+    text_id:state.text_id,
+    created_at:new Date().toISOString(),
+    file_id:makeId(),
+    parent_id:state.parent_id||null,
+    parent_hash:state.parent_hash||null,
+    source_files:{ontology:APP.ontology_source,texts:APP.texts_source},
+    annotations
+  };
+}
+function filenameFor(obj){return `${obj.participant_code}_${obj.text_id}_${obj.phase}.json`;}
+function downloadText(name,text,mime="application/json"){
+  const blob=new Blob([text],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportCurrent(){
+  if(countDone()!==20||!metaValid()||state.frozen)return;
+  const obj=buildExport(), raw=JSON.stringify(obj,null,2), name=filenameFor(obj);
+  downloadText(name,raw);
+  state.frozen=true;state.lastExport=obj;state.lastExportName=name;state.parentRaw=raw;
+  renderProgress();renderGuide();
+  $("freezeFile").textContent=name;
+  const next=phaseMeta[state.phase].next;
+  $("freezeText").textContent=`${state.phase} quedou exportado. Nesta sesión xa non se pode editar esta fase.`;
+  $("continueBtn").style.display=next?"inline-flex":"none";
+  $("continueBtn").textContent=next?`Continuar a ${next}`:"";
+  $("freezeModal").style.display="grid";
+}
+$("exportBtn").onclick=exportCurrent;
+$("redownloadBtn").onclick=()=>{if(state.lastExport)downloadText(state.lastExportName,JSON.stringify(state.lastExport,null,2));};
+$("finishBtn").onclick=()=>{$("freezeModal").style.display="none";};
+$("continueBtn").onclick=()=>continueNext();
+
+function continueNext(){
+  const next=phaseMeta[state.phase].next;
+  if(!next||!state.lastExport)return;
+  const parent=state.lastExport, raw=JSON.stringify(parent);
+  state.phase=next;
+  state.parent_id=parent.file_id;
+  state.parent_hash=fnv1a(raw);
+  state.source_file_id=parent.file_id;
+  state.frozen=false;state.lastExport=null;state.lastExportName=null;
+  // Initialize next phase with exact parent routes.
+  currentText().targets.forEach(t=>{
+    const h=state.history[t.target_id];
+    h[next]=JSON.parse(JSON.stringify(h[{V1:"V0",E1:"V1",V2:"E1"}[next]]));
+  });
+  state.active_target_id=null;
+  state.tree_step="L1";
+  state.pending_l1_id=null;
+  state.just_completed=null;
+  $("freezeModal").style.display="none";
+  renderMetaEdit();updateTop();renderStory();renderTargets();renderTree();renderProgress();renderGuide();
+  $("phaseInstruction").textContent=phaseMeta[state.phase].desc;
+  $("phaseTitle").textContent=phaseMeta[state.phase].title;
+  $("phaseDesc").textContent=phaseMeta[state.phase].desc;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function parseLoaded(obj,raw){
+  const problems=[];
+  if(obj.kind!=="ESMAS_ESPLUS_VIAXE_TREN_INDIVIDUAL")problems.push("O ficheiro non pertence a esta intervención.");
+  if(obj.schema_version!==APP.schema_version)problems.push(`schema_version incompatible (${obj.schema_version||"ausente"}).`);
+  if(!["V0","V1","E1","V2"].includes(obj.phase))problems.push("A fase do ficheiro non é válida.");
+  if(!codeRegex.test(obj.participant_code||""))problems.push("O código de participante non é válido.");
+  if(!DATA.texts[obj.text_id])problems.push("O text_id non é válido.");
+  if(!Array.isArray(obj.annotations)||obj.annotations.length!==20)problems.push("O ficheiro non contén exactamente 20 anotacións.");
+  if(problems.length)return {ok:false,problems};
+  const expected=new Set(DATA.texts[obj.text_id].targets.map(t=>t.target_id));
+  const got=new Set(obj.annotations.map(a=>a.target_id));
+  if(got.size!==20 || [...expected].some(x=>!got.has(x)))problems.push("Os target_id non coinciden co texto esperado.");
+  if(problems.length)return {ok:false,problems};
+  return {ok:true};
+}
+$("fileInput").addEventListener("change",async e=>{
+  const f=e.target.files?.[0]; if(!f)return;
+  $("loadMessage").innerHTML=`<div class="notice notice-info">Lendo ${esc(f.name)}…</div>`;
+  try{
+    const raw=await f.text(), obj=JSON.parse(raw), val=parseLoaded(obj,raw);
+    if(!val.ok){
+      $("loadMessage").innerHTML=`<div class="notice notice-danger"><strong>Non se pode cargar.</strong><br>${val.problems.map(esc).join("<br>")}</div>`;
+      return;
+    }
+    if(obj.phase==="V2"){
+      $("loadMessage").innerHTML=`<div class="notice notice-info"><strong>Cargaches un V2.</strong> A traxectoria individual xa está finalizada. Este ficheiro non se pode converter noutro V2 nin modificar nesta app.</div>`;
+      return;
+    }
+    const next=phaseMeta[obj.phase].next;
+    $("loadMessage").innerHTML=`<div class="notice notice-ok"><strong>${esc(obj.phase)} válido.</strong> A seguinte fase permitida é ${esc(next)}.</div>
+      <div class="actions"><button type="button" class="btn btn-primary" id="continueLoaded">Continuar a ${esc(next)}</button></div>`;
+    $("continueLoaded").onclick=()=>loadAsNext(obj,raw,next);
+  }catch(err){
+    $("loadMessage").innerHTML=`<div class="notice notice-danger"><strong>Non se puido ler o ficheiro.</strong> Comproba que é un JSON válido.</div>`;
+  }
+});
+function loadAsNext(obj,raw,next){
+  state={
+    mode:"load",phase:next,participant_code:obj.participant_code,text_id:obj.text_id,
+    origin_group_id:obj.origin_group_id||null,expert_group_id:obj.expert_group_id||null,
+    history:blankHistory(obj.text_id),active_target_id:null,
+    parent_id:obj.file_id||null,parent_hash:fnv1a(raw),source_file_id:obj.file_id||null,
+    frozen:false,lastExport:null,lastExportName:null,parentRaw:raw
+  };
+  obj.annotations.forEach(a=>{
+    state.history[a.target_id]=a.history||{V0:null,V1:null,E1:null,V2:null};
+    const parentPhase=obj.phase;
+    const parentRoute=a.current_route || state.history[a.target_id][parentPhase];
+    state.history[a.target_id][next]=parentRoute?JSON.parse(JSON.stringify(parentRoute)):null;
+  });
+  showApp();
+}
+$("backStartBtn").onclick=()=>{
+  if(confirm("Queres saír desta sesión? As mudanzas non exportadas perderanse.")){
+    location.reload();
+  }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="gl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#eaf9fb" />
+  <title>Xeado á fuxida! — un xogo en galego</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body { background: #eaf9fb; font-family: ui-rounded, system-ui, -apple-system, 'Arial Rounded MT Bold', sans-serif; color: #214956; overscroll-behavior: none; }
+    #xeado-app { max-width: 480px; margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) 14px max(13px, env(safe-area-inset-bottom)); user-select: none; -webkit-user-select:none; -webkit-tap-highlight-color: transparent; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 9px; }
+    .brand .small { font-size: 10px; letter-spacing: 2.4px; font-weight: 900; color: #498c9a; }
+    .brand h1 { color: #214956; margin: -1px 0 0; font-size: clamp(22px, 5.5vw, 30px); font-weight: 1000; line-height: 1.08; letter-spacing: -0.9px; }
+    .brand .a { color: #f47791; }
+    .headbuttons { display: flex; gap: 7px; }
+    button { font: inherit; cursor: pointer; }
+    .smallbtn { width: 39px; height: 39px; background: #fff; border: 2px solid #d3eff1; box-shadow: 0 3px 0 #b9dfe5; border-radius: 13px; font-size: 19px; display: grid; place-items: center; touch-action: manipulation; }
+    .smallbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #b9dfe5; }
+    .hud { display:grid; grid-template-columns: 0.87fr 1.12fr 1.15fr; gap: 8px; margin-bottom: 10px; }
+    .stat { border-radius: 13px; background: rgba(255,255,255,.96); padding: 7px 9px; box-shadow: 0 3px 0 #c7e6e9; text-align: center; border: 1px solid #d8eeed; min-width:0; }
+    .stat-label { font-size: 9px; letter-spacing: 1.15px; color: #6994a1; font-weight: 900; }
+    .stat-value { font-size: 18px; font-weight: 950; white-space: nowrap; }
+    .hearts { color: #ef718a; letter-spacing:1px; }
+    .board-wrap { width: 100%; padding: 7px; border: 3px solid #94d1d8; border-radius: 19px; background: #fff; box-shadow: 0 7px 0 #b1dbe0,0 13px 28px #2b9bab15; position:relative; overflow:hidden; }
+    canvas { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: 12px; background: #c5eced; touch-action: none; }
+    .overlay { position:absolute; inset: 7px; border-radius: 12px; z-index: 2; background: #1a546cc9; display: flex; align-items: center; justify-content: center; padding: 16px; text-align:center; color:white; backdrop-filter: blur(2px); }
+    .overlay.hidden { display:none; }
+    .panel { background:#fffdf7; color:#285460; padding: 21px 14px 18px; border-radius: 20px; width:min(100%,320px); border: 3px solid #ffd7b0; box-shadow: 0 7px 0 #d39c75; }
+    .panel .mascot { font-size:39px; margin-bottom: 2px; }
+    .panel h2 { margin: 3px 0 8px; font-size:26px; line-height:1.05; font-weight:1000; color:#f06b8b; letter-spacing:-.6px; }
+    .panel p { margin: 6px 5px 15px; line-height:1.34; font-size:13px; font-weight:700; }
+    .primary { border:0; border-radius: 15px; background:#fc8197; color:#fff; font-size:17px; font-weight:1000; padding: 12px 25px; box-shadow: 0 5px 0 #d95777; min-width: 145px; }
+    .primary:active { transform:translateY(3px); box-shadow: 0 2px 0 #d95777; }
+    .controls { display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 12px 4px 0; }
+    .dpad { width: 217px; display:grid; grid-template-columns: repeat(3, 65px); grid-template-rows: repeat(3, 49px); justify-content:center; gap: 4px; }
+    .dir { border:2px solid #aadfe3; background:#fff; color:#39818f; border-radius: 15px; font-size:25px; font-weight:900; box-shadow: 0 4px 0 #a4d1d8; touch-action:none; display:grid; place-items:center; line-height: 1; }
+    .dir.pressed, .dir:active { background:#d4f4f4; transform:translateY(3px); box-shadow:0 1px 0 #a4d1d8; }
+    .dir[data-dir="up"] { grid-column: 2; grid-row:1; }
+    .dir[data-dir="left"] { grid-column: 1; grid-row:2; }
+    .dir[data-dir="right"] { grid-column: 3; grid-row:2; }
+    .dir[data-dir="down"] { grid-column: 2; grid-row:3; }
+    .actioncol { text-align: center; min-width: 110px; flex:1; display:flex; flex-direction:column; align-items:center; gap:7px; }
+    .icebtn { width:105px; height:105px; border-radius:50%; background: #67c4e3; border:4px solid #e1faff; box-shadow:0 5px 0 #3996ba, 0 0 0 3px #9bdae5; color:white; font-size: 43px; display:flex; align-items:center; justify-content:center; touch-action:manipulation; }
+    .icebtn:active { transform:translateY(3px); box-shadow:0 2px 0 #3996ba,0 0 0 3px #9bdae5; }
+    .ice-label { color:#41849b; font-size:12px; font-weight:1000; letter-spacing:1.8px; }
+    .instructions { margin:3px 0 0; text-align:center; color:#6b9da5; font-size:11px; font-weight:700; line-height:1.4; }
+    .toast { position:absolute; top:15px; left:50%; transform:translateX(-50%); padding:8px 13px; color:#15516a; font-size:12px; font-weight:950; background:#fff8d9; border-radius:99px; box-shadow:0 3px 0 #ebd5a5; z-index:1; opacity:0; pointer-events:none; white-space:nowrap; transition:opacity .15s; }
+    .toast.show {opacity:1;}
+    @media (max-width:375px) { #xeado-app {padding-left:9px;padding-right:9px;} .controls {padding-top:10px;} .dpad{width:199px;grid-template-columns:repeat(3,59px);grid-template-rows:repeat(3,46px);} .icebtn{width:90px;height:90px;} .stat-value{font-size:16px;} .panel{padding:14px 10px;} .panel h2{font-size:23px;} }
+    @media (max-height:720px) { .dpad {grid-template-rows: repeat(3,43px);} .icebtn{width:90px;height:90px;} .instructions{font-size:10px;} }
+  </style>
+</head>
+<body>
+<div id="xeado-app">
+  <div class="top">
+    <div class="brand"><div class="small">MINIXOGO EN GALEGO • 1 XOGADOR</div><h1>XEADO <span class="a">Á FUXIDA!</span></h1></div>
+    <div class="headbuttons"><button class="smallbtn" id="soundBtn" type="button" aria-label="Activar ou desactivar o son" title="Son">🔊</button><button class="smallbtn" id="pauseBtn" type="button" aria-label="Pausar" title="Pausa">⏸</button></div>
+  </div>
+  <div class="hud" aria-live="polite">
+    <div class="stat"><div class="stat-label">NIVEL</div><div class="stat-value" id="levelLabel">1 / 5</div></div>
+    <div class="stat"><div class="stat-label">FROITAS</div><div class="stat-value" id="fruitLabel">0 / 8</div></div>
+    <div class="stat"><div class="stat-label">VIDAS</div><div class="stat-value hearts" id="lifeLabel">♥ ♥ ♥</div></div>
+  </div>
+  <div class="board-wrap">
+    <canvas id="gameCanvas" width="440" height="440" aria-label="Taboleiro do xogo Xeado á fuxida"></canvas>
+    <div class="toast" id="toast">+1 froita!</div>
+    <div class="overlay" id="overlay">
+      <div class="panel">
+        <div class="mascot" id="overlayIcon">🍦</div>
+        <h2 id="overlayTitle">A aventura máis fresca!</h2>
+        <p id="overlayText">Recolle todas as froitas 🍓 sen que te atrapen! Móvete coas frechas e toca ❄ para crear ou romper xeo.</p>
+        <button class="primary" id="mainButton" type="button">XOGAR ▶</button>
+      </div>
+    </div>
+  </div>
+  <div class="controls" aria-label="Controis do xogo">
+    <div class="dpad">
+      <button class="dir" data-dir="up" type="button" aria-label="Arriba">▲</button>
+      <button class="dir" data-dir="left" type="button" aria-label="Esquerda">◀</button>
+      <button class="dir" data-dir="right" type="button" aria-label="Dereita">▶</button>
+      <button class="dir" data-dir="down" type="button" aria-label="Abaixo">▼</button>
+    </div>
+    <div class="actioncol"><button class="icebtn" type="button" id="iceBtn" aria-label="Crear ou romper bloques de xeo">❄</button><div class="ice-label">XEO MÁXICO</div></div>
+  </div>
+  <p class="instructions">Mantén premida unha frecha para avanzar · Tamén podes deslizar o dedo polo taboleiro · Espazo = xeo</p>
+</div>
+<script>
+(function(){
+  'use strict';
+  const root = document.getElementById('xeado-app');
+  if (!root || root.dataset.ready) return;
+  root.dataset.ready='1';
+  const cvs=root.querySelector('#gameCanvas'), c=cvs.getContext('2d');
+  const S=40,N=11,TWO=Math.PI*2;
+  const dirs={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};
+  const $=id=>root.querySelector('#'+id);
+  const overlay=$('overlay'),mainButton=$('mainButton');
+  const MAX_LEVEL=5;
+  let state='intro', level=1, lives=3, fruits=[],rocks=new Set(),ice=new Set(), enemies=[], particles=[], player={x:1,y:1,dir:'right',safeUntil:0}, grabbed=0,total=8, score=0;
+  let lastTime=0,enemyTimer=0, moveTimer=null,heldDir='',sfxEnabled=true,audioCtx=null,lastIce=0,toastUntil=0,roundTick=0;
+  const key=(x,y)=>x+','+y, rnd=(a,b)=>a+Math.random()*(b-a);
+  const levels=[
+    {fruit:8,enemy:1,rocks:[[5,5],[4,5],[6,5],[5,4]],ice:[[3,3],[3,4],[7,3],[7,4],[2,7],[3,7],[7,7]],spawns:[[9,9]]},
+    {fruit:9,enemy:2,rocks:[[4,3],[5,3],[6,3],[4,7],[5,7],[6,7]],ice:[[3,5],[4,5],[6,5],[7,5],[2,2],[8,2],[2,8],[8,8]],spawns:[[9,9],[9,1]]},
+    {fruit:10,enemy:2,rocks:[[3,3],[7,3],[3,7],[7,7],[5,5]],ice:[[5,2],[5,3],[5,4],[5,6],[5,7],[5,8],[2,5],[3,5],[7,5],[8,5]],spawns:[[9,9],[1,9]]},
+    {fruit:11,enemy:3,rocks:[[3,2],[7,2],[3,8],[7,8],[5,5]],ice:[[3,4],[3,5],[3,6],[7,4],[7,5],[7,6],[5,2],[5,8]],spawns:[[9,9],[9,1],[1,9]]},
+    {fruit:12,enemy:3,rocks:[[5,3],[5,7],[3,5],[7,5],[2,2],[8,8]],ice:[[4,3],[6,3],[4,7],[6,7],[3,4],[3,6],[7,4],[7,6],[5,5]],spawns:[[9,9],[9,1],[1,9]]}
+  ];
+  function setOverlay(icon,title,desc,button,callback){
+    $('overlayIcon').textContent=icon; $('overlayTitle').textContent=title; $('overlayText').textContent=desc; mainButton.textContent=button;
+    mainButton.onclick=callback; overlay.classList.remove('hidden'); stopHeld();
+  }
+  function clearOverlay(){overlay.classList.add('hidden');}
+  function sound(type){
+    if(!sfxEnabled)return;
+    try {audioCtx ||= new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended')audioCtx.resume();
+      const now=audioCtx.currentTime, o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.type=type==='hit'?'sawtooth':'sine'; o.connect(g);g.connect(audioCtx.destination);
+      let f1=350,f2=650,dur=.12;
+      if(type==='fruit'){f1=660;f2=1050;dur=.15;}
+      if(type==='ice'){f1=540;f2=260;dur=.11;}
+      if(type==='hit'){f1=220;f2=90;dur=.28;}
+      if(type==='win'){f1=520;f2=950;dur=.32;}
+      o.frequency.setValueAtTime(f1,now);o.frequency.exponentialRampToValueAtTime(f2,now+dur);
+      g.gain.setValueAtTime(.08,now);g.gain.exponentialRampToValueAtTime(.001,now+dur);
+      o.start(now);o.stop(now+dur);
+    }catch(_e){}
+  }
+  function updateHud(){ $('levelLabel').textContent=level+' / '+MAX_LEVEL; $('fruitLabel').textContent=grabbed+' / '+total; $('lifeLabel').textContent=('♥ '.repeat(lives)).trim()||'—'; }
+  function loadLevel(num, resetLives){
+    level=num; if(resetLives) {lives=3;score=0;}
+    let data=levels[level-1]; rocks=new Set(data.rocks.map(([x,y])=>key(x,y)));
+    ice=new Set(data.ice.map(([x,y])=>key(x,y))); fruits=[];particles=[];
+    player={x:1,y:1,dir:'right',safeUntil:performance.now()+1100};
+    enemies=data.spawns.slice(0,data.enemy).map(([x,y],i)=>({x,y,hx:x,hy:y,t:0,color:i%2}));
+    total=data.fruit; grabbed=0; enemyTimer=0;roundTick=0;
+    const busy=new Set([...rocks,...ice,key(1,1),...enemies.map(e=>key(e.x,e.y))]);
+    let candidates=[];
+    for(let y=1;y<N-1;y++)for(let x=1;x<N-1;x++)if(!busy.has(key(x,y)))candidates.push([x,y]);
+    // Distribuír a froita polo taboleiro e manter algunha próxima ao inicio.
+    candidates.sort((a,b)=> (Math.sin(a[0]*21.9+a[1]*37.2+level*72)*0.5)- (Math.sin(b[0]*21.9+b[1]*37.2+level*72)*0.5));
+    let zones=[ [2,1],[1,5],[8,1],[8,5],[2,9],[7,8] ];
+    for(let [x,y] of zones){if(fruits.length<total&&!busy.has(key(x,y))) {fruits.push({x,y,type:fruits.length%5});busy.add(key(x,y));}}
+    for(let [x,y] of candidates){if(fruits.length>=total) break;if(!busy.has(key(x,y))){fruits.push({x,y,type:fruits.length%5});busy.add(key(x,y));}}
+    updateHud();
+  }
+  function begin(){lives=3;score=0;loadLevel(1,false);state='playing';clearOverlay();sound('fruit');}
+  function isWall(x,y){return x<=0||y<=0||x>=N-1||y>=N-1||rocks.has(key(x,y))||ice.has(key(x,y));}
+  function move(direction){
+    if(state!=='playing')return;
+    const d=dirs[direction];if(!d)return;
+    player.dir=direction;
+    let nx=player.x+d.x,ny=player.y+d.y;
+    if(!isWall(nx,ny)){
+      player.x=nx;player.y=ny;
+      const idx=fruits.findIndex(f=>f.x===nx&&f.y===ny);
+      if(idx!==-1){const f=fruits.splice(idx,1)[0]; grabbed++;score+=100;burst(nx,ny,['#fff','#ffe58f','#ff899d'],9);sound('fruit');updateHud();toast('Froita deliciosa! +100'); if(grabbed===total){winLevel();return;}}
+      collide(performance.now());
+    }
+  }
+  function burst(x,y,colors,num){for(let i=0;i<num;i++)particles.push({x:(x+.5)*S,y:(y+.5)*S,vx:rnd(-2.4,2.4),vy:rnd(-3.6,.6),life:rnd(18,30),max:30,color:colors[Math.floor(Math.random()*colors.length)]});}
+  function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');toastUntil=performance.now()+900;}
+  function magicIce(){
+    if(state!=='playing')return;
+    let now=performance.now();if(now-lastIce<260)return;lastIce=now;
+    let d=dirs[player.dir],ax=player.x+d.x,ay=player.y+d.y;
+    if(ice.has(key(ax,ay))){
+      let count=0;
+      for(let n=1;n<=3;n++){const x=player.x+d.x*n,y=player.y+d.y*n;if(!ice.has(key(x,y)))break;ice.delete(key(x,y));burst(x,y,['#e6ffff','#81d8eb','#fff'],5);count++;}
+      if(count){sound('ice');toast('Xeo roto!');}
+    } else {
+      let count=0;
+      for(let n=1;n<=3;n++){
+        const x=player.x+d.x*n,y=player.y+d.y*n,k=key(x,y);
+        if(x<=0||y<=0||x>=N-1||y>=N-1||rocks.has(k)||ice.has(k)||fruits.some(f=>f.x===x&&f.y===y)||enemies.some(e=>e.x===x&&e.y===y)) break;
+        ice.add(k);burst(x,y,['#b6faff','#fff'],4);count++;
+      }
+      if(count){sound('ice');toast('Muralla de xeo!');}
+    }
+  }
+  function collide(now){
+    if(state!=='playing'||now<player.safeUntil)return;
+    if(enemies.some(e=>e.x===player.x&&e.y===player.y)){
+      lives--;sound('hit');burst(player.x,player.y,['#ffb7c8','#fff','#ffe68b'],17);updateHud();
+      if(lives<=0){state='lost';setOverlay('💔','Oh, derreteches!','Conseguiches '+grabbed+' de '+total+' froitas neste nivel. Volve intentalo!','REINTENTAR ↻',()=>{loadLevel(level,true);state='playing';clearOverlay();});return;}
+      player.x=1;player.y=1;player.dir='right';player.safeUntil=now+1900;
+      enemies.forEach(e=>{e.x=e.hx;e.y=e.hy;});toast('Ai! Quédanche '+lives+' vidas');
+    }
+  }
+  function winLevel(){
+    state='won';sound('win');
+    if(level===MAX_LEVEL){setOverlay('🏆','Campión do xeo!','Superaches os 5 niveis e salvaches todas as froitas. Es unha lenda xeada!','XOGAR DE NOVO ↻',begin);}
+    else setOverlay('🎉','Nivel superado!','Recolliches todas as froitas! O seguinte nivel trae máis monstros e máis xeo.','SEGUINTE NIVEL ▶',()=>{loadLevel(level+1,false);state='playing';clearOverlay();});
+  }
+  function pause(){
+    if(state==='playing'){state='paused';setOverlay('⏸','Pausa fresquiña','A túa aventura está gardada neste nivel.','CONTINUAR ▶',()=>{state='playing';player.safeUntil=performance.now()+400;clearOverlay();});}
+    else if(state==='paused'){state='playing';clearOverlay();}
+  }
+  function bfs(e){
+    let q=[[e.x,e.y]],seen=new Set([key(e.x,e.y)]),first=new Map();
+    for(let i=0;i<q.length;i++){
+      let [x,y]=q[i];if(x===player.x&&y===player.y)break;
+      const shuffled=Object.values(dirs).sort(()=>Math.random()-.5);
+      for(const d of shuffled){let nx=x+d.x,ny=y+d.y,k=key(nx,ny);if(!isWall(nx,ny)&&!seen.has(k)){
+        seen.add(k);first.set(k,i===0?[nx,ny]:first.get(key(x,y)));q.push([nx,ny]);
+      }}
+    }
+    return first.get(key(player.x,player.y));
+  }
+  function tickEnemies(now){
+    enemies.forEach(e=>{
+      const opts=Object.values(dirs).map(d=>[e.x+d.x,e.y+d.y]).filter(([x,y])=>!isWall(x,y)&&!enemies.some(o=>o!==e&&o.x===x&&o.y===y));
+      if(!opts.length)return;
+      const chase=bfs(e);
+      const choice=chase&&opts.some(p=>p[0]===chase[0]&&p[1]===chase[1])&&Math.random()<.8?chase:opts[Math.floor(Math.random()*opts.length)];
+      e.x=choice[0];e.y=choice[1];
+    });
+    collide(now);
+  }
+  const rect=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h);};
+  function rounded(x,y,w,h,r,col){c.fillStyle=col;c.beginPath();c.roundRect(x,y,w,h,r);c.fill();}
+  function dot(x,y,r,col){c.beginPath();c.arc(x,y,r,0,TWO);c.fillStyle=col;c.fill();}
+  function drawRock(x,y){let X=x*S,Y=y*S;rounded(X+3,Y+4,34,33,7,'#85a8ad');rounded(X+3,Y+2,34,32,7,'#a7c5c5');rounded(X+7,Y+6,25,8,4,'#d6e6e3');rect(X+17,Y+19,4,11,'#91b2b7');rect(X+19,Y+21,10,4,'#91b2b7');}
+  function drawIce(x,y){let X=x*S,Y=y*S;rounded(X+2,Y+4,36,34,6,'#4aafcb');rounded(X+2,Y+2,36,33,6,'#83e1ee');rounded(X+5,Y+5,30,27,5,'#a8f4f3');rounded(X+8,Y+7,21,7,3,'#e8ffff');rect(X+8,Y+20,5,8,'#d4ffff');rect(X+24,Y+24,6,4,'#fff');}
+  function drawFruit(f,time){
+    const x=(f.x+.5)*S,y=(f.y+.5)*S+Math.sin(time/360+f.x)*1.6;
+    c.save();c.translate(x,y);c.fillStyle='#4c88832a';c.beginPath();c.ellipse(0,13,11,3,0,0,TWO);c.fill();
+    if(f.type===0){ // amorodo
+      c.fillStyle='#f25979';c.beginPath();c.moveTo(-11,-8);c.quadraticCurveTo(0,-15,11,-8);c.quadraticCurveTo(11,4,0,13);c.quadraticCurveTo(-12,3,-11,-8);c.fill();
+      for(const [a,b] of [[-5,-4],[4,-2],[-3,4],[5,5],[0,0]])dot(a,b,1.15,'#fff0ad');
+      c.fillStyle='#4ba96e';c.beginPath();c.moveTo(-7,-9);c.lineTo(-1,-7);c.lineTo(0,-13);c.lineTo(4,-8);c.lineTo(8,-10);c.lineTo(3,-4);c.lineTo(-3,-5);c.closePath();c.fill();
+    }else if(f.type===1){dot(0,0,12,'#ffbd46');dot(-3,-3,7,'#ffcf65');rounded(-1,-14,3,6,1,'#53966f');c.fillStyle='#5fb77c';c.beginPath();c.ellipse(4,-12,5,3,-.7,0,TWO);c.fill();}
+    else if(f.type===2){dot(-6,-1,7,'#7a86da');dot(6,0,8,'#586ac9');dot(-7,-3,2,'#c6d0ff');dot(5,-3,2,'#c6d0ff');}
+    else if(f.type===3){dot(-6,4,8,'#e85d74');dot(7,4,8,'#f4697b');c.strokeStyle='#4e9b70';c.lineWidth=2;c.beginPath();c.moveTo(-6,-3);c.lineTo(-1,-13);c.lineTo(7,-4);c.stroke();dot(-1,-13,2,'#64ae80');}
+    else {c.fillStyle='#60ad73';c.beginPath();c.moveTo(-13,8);c.lineTo(0,-13);c.lineTo(13,8);c.closePath();c.fill();c.fillStyle='#f77a85';c.beginPath();c.moveTo(-10,6);c.lineTo(0,-10);c.lineTo(10,6);c.closePath();c.fill();for(const [a,b] of [[-3,1],[4,2],[0,-5]])dot(a,b,1,'#4a4766');}
+    c.restore();
+  }
+  function drawEnemy(e,time){
+    let x=(e.x+.5)*S,y=(e.y+.5)*S+Math.sin(time/230+e.hx)*1.5;
+    c.save();c.translate(x,y);c.fillStyle='#34746a30';c.beginPath();c.ellipse(0,14,13,4,0,0,TWO);c.fill();
+    const shade=e.color?'#f9a65e':'#a77cdc', light=e.color?'#ffc37c':'#c49ceb';
+    c.fillStyle=shade;c.beginPath();c.moveTo(-14,9);c.quadraticCurveTo(-16,-15,0,-15);c.quadraticCurveTo(16,-15,14,9);c.quadraticCurveTo(11,15,7,10);c.quadraticCurveTo(2,16,-2,10);c.quadraticCurveTo(-9,16,-14,9);c.fill();
+    c.fillStyle=light;c.beginPath();c.ellipse(-5,-8,5,3,-.6,0,TWO);c.fill();
+    dot(-5,1,2.1,'#3e3157');dot(6,1,2.1,'#3e3157');
+    c.strokeStyle='#584461';c.lineWidth=1.4;c.lineCap='round';c.beginPath();c.moveTo(-9,-3);c.lineTo(-3,-1);c.moveTo(3,-1);c.lineTo(9,-3);c.stroke();
+    c.restore();
+  }
+  function drawPlayer(time){
+    let x=(player.x+.5)*S,y=(player.y+.5)*S;
+    const invuln=performance.now()<player.safeUntil;
+    if(invuln && Math.floor(time/130)%2===0)c.globalAlpha=.42;
+    c.save();c.translate(x,y+Math.sin(time/220)*.6);
+    c.fillStyle='#418c8a42';c.beginPath();c.ellipse(0,15,12,3.5,0,0,TWO);c.fill();
+    // Cunca crocante
+    c.fillStyle='#d8a36e';c.beginPath();c.moveTo(-10,3);c.lineTo(0,17);c.lineTo(10,3);c.closePath();c.fill();
+    c.strokeStyle='#ad7d55';c.lineWidth=1;c.beginPath();c.moveTo(-5,6);c.lineTo(4,12);c.moveTo(5,6);c.lineTo(-3,12);c.stroke();
+    // Xeado con brillo
+    dot(0,-5,14,'#f987a2');dot(-6,-9,7,'#ffabc1');dot(5,-10,7,'#f993ae');
+    dot(-5,-6,2.2,'#2d525b');dot(5,-6,2.2,'#2d525b');dot(-10,-1,2,'#f06583');dot(10,-1,2,'#f06583');
+    c.strokeStyle='#934b66';c.lineWidth=1.5;c.beginPath();c.arc(0,-4,3.2,.15,Math.PI-.15);c.stroke();
+    // dirección cunha minifolga de xeo
+    const d=dirs[player.dir];dot(d.x*15,d.y*15-4,2.5,'#e9ffff');
+    c.restore();c.globalAlpha=1;
+  }
+  function draw(time){
+    c.clearRect(0,0,N*S,N*S);
+    rect(0,0,440,440,'#d4f2ec');
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+      let X=x*S,Y=y*S;
+      if(x===0||y===0||x===N-1||y===N-1){rounded(X+1,Y+1,S-2,S-2,5,(x+y)%2?'#4b9eae':'#5cacc0');rounded(X+5,Y+5,24,5,3,'#8bd0d7');continue;}
+      rect(X,Y,S,S,(x+y)%2?'#dff7ed':'#d6f2e9');
+      dot(X+8,Y+9,1.2,'#bce9e1');dot(X+29,Y+30,1.2,'#bce9e1');
+    }
+    rocks.forEach(v=>{let [x,y]=v.split(',').map(Number);drawRock(x,y);});
+    ice.forEach(v=>{let [x,y]=v.split(',').map(Number);drawIce(x,y);});
+    fruits.forEach(f=>drawFruit(f,time));
+    enemies.forEach(e=>drawEnemy(e,time));
+    drawPlayer(time);
+    particles.forEach(p=>{c.globalAlpha=Math.max(0,p.life/p.max);dot(p.x,p.y,2.4,p.color);});c.globalAlpha=1;
+  }
+  function frame(time){
+    const elapsed=Math.min(50,time-(lastTime||time));lastTime=time;
+    if(state==='playing'){
+      enemyTimer+=elapsed;roundTick+=elapsed;
+      const interval=Math.max(365, 830-level*70);
+      if(enemyTimer>=interval){enemyTimer%=interval;tickEnemies(time);}
+      for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=.095;p.life-=.9;}
+      particles=particles.filter(p=>p.life>0);
+    }
+    if(toastUntil && time>toastUntil){$('toast').classList.remove('show');toastUntil=0;}
+    draw(time);requestAnimationFrame(frame);
+  }
+  function stopHeld(){if(moveTimer){clearInterval(moveTimer);moveTimer=null;}if(heldDir){const el=root.querySelector('.dir[data-dir="'+heldDir+'"]');el?.classList.remove('pressed');}heldDir='';}
+  function hold(dir){if(state!=='playing')return;if(heldDir===dir)return;stopHeld();heldDir=dir;move(dir);const el=root.querySelector('.dir[data-dir="'+dir+'"]');el?.classList.add('pressed');moveTimer=setInterval(()=>move(dir),147);}
+  root.querySelectorAll('.dir').forEach(btn=>{
+    btn.addEventListener('pointerdown',e=>{e.preventDefault();try{btn.setPointerCapture(e.pointerId)}catch(_){}hold(btn.dataset.dir);});
+    btn.addEventListener('pointerup',stopHeld);btn.addEventListener('pointercancel',stopHeld);btn.addEventListener('lostpointercapture',stopHeld);
+  });
+  $('iceBtn').addEventListener('click',magicIce);
+  $('soundBtn').addEventListener('click',()=>{sfxEnabled=!sfxEnabled;$('soundBtn').textContent=sfxEnabled?'🔊':'🔇';});
+  $('pauseBtn').addEventListener('click',pause);
+  const keyDirs={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right'};
+  document.addEventListener('keydown',e=>{if(!root.isConnected||e.repeat)return;if(keyDirs[e.key]){e.preventDefault();hold(keyDirs[e.key]);}else if(e.code==='Space'){e.preventDefault();magicIce();}else if(e.key.toLowerCase()==='p'){pause();}});
+  document.addEventListener('keyup',e=>{if(keyDirs[e.key])stopHeld();});
+  window.addEventListener('blur',stopHeld);
+  let start=null;
+  cvs.addEventListener('pointerdown',e=>{start={x:e.clientX,y:e.clientY};});
+  cvs.addEventListener('pointerup',e=>{if(!start||state!=='playing')return;const dx=e.clientX-start.x,dy=e.clientY-start.y;start=null;
+    if(Math.max(Math.abs(dx),Math.abs(dy))<12)return;
+    const d=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');
+    move(d);
+  });
+  cvs.addEventListener('pointercancel',()=>{start=null;});
+  loadLevel(1,true);
+  setOverlay('🍦','A aventura máis fresca!','Recolle todas as froitas sen que te atrapen! Usa as frechas para avanzar e ❄ para crear ou romper bloques de xeo.','XOGAR ▶',begin);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
